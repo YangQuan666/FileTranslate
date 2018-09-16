@@ -2,9 +2,14 @@ package com.example.yangquan.myapplication;
 
 
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.net.wifi.ScanResult;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.app.AppCompatActivity;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,6 +22,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 public class recev_file_step1 extends AppCompatActivity {
 
     private Switch aSwitch;
@@ -26,14 +33,40 @@ public class recev_file_step1 extends AppCompatActivity {
     private ArrayList<ScanResult> mList = new ArrayList<>();
     ArrayList<HashMap<String,String>> myArrayList=new ArrayList<>();
     WifiService wifiService;
-
+    private Handler uiHandler ;
+    ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.recev_file_step1);
-        wifiService = WifiService.getInstance(getApplicationContext());
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setMax(100);
+        progressDialog.setMessage("正在发送");
+        uiHandler = new Handler(){
 
+//            @Override
+            public void handleMessage(Message msg){
+                progressDialog.setMessage("正在发送第"+msg.arg1+"个文件");
+                progressDialog.setProgress((int) msg.obj);
+//                mToast = Toast.makeText(getApplicationContext(),
+//                        "正在发送第"+msg.arg1+"个文件，已发送"+msg.obj+"%",
+//                        Toast.LENGTH_SHORT);
+//                mToast.show();
+
+//            switch (msg.what){
+//                case 1:
+//                        alertDialog.setMessage("正在发送第"+msg.arg1+"个文件，已发送"+msg.obj+"%");
+//                        alertDialog.show();
+//                    break;
+//                case 0:
+//                    alertDialog.setMessage("发送完毕").show();
+//                    break;
+//            }
+            }
+        };
+        wifiService = WifiService.getInstance(getApplicationContext());
         //wifi开关
         aSwitch = findViewById(R.id.switch1);
         aSwitch.setChecked(wifiService.isWifiEnable());
@@ -57,9 +90,7 @@ public class recev_file_step1 extends AppCompatActivity {
         buttonInfo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getApplicationContext(),
-                        wifiService.getWifiInfo().toString(),
-                        Toast.LENGTH_LONG).show();
+
                 //打印 IP 地址
                 Log.i("本机ip地址:",wifiService.getIp());
                 Log.i("热点ip地址:",wifiService.getApIp());
@@ -71,8 +102,8 @@ public class recev_file_step1 extends AppCompatActivity {
         startRev.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progressDialog.show();
                 //接收文件
-
                 Thread Recevthread = new Thread(new Runnable() {
 
                     @Override
@@ -80,7 +111,7 @@ public class recev_file_step1 extends AppCompatActivity {
                         try  {
                             //接收文件
 
-                            new SocketClient(getApplicationContext(),wifiService.getApIp(),8989);
+                            SocketClient client = new SocketClient(getApplicationContext(),wifiService.getApIp(),8989,uiHandler);
 
                         } catch (Exception e) {
                             e.printStackTrace();

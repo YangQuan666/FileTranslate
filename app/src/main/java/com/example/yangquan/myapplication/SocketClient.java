@@ -2,6 +2,10 @@ package com.example.yangquan.myapplication;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.os.MessageQueue;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -18,13 +22,18 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
+
 public class SocketClient {
 
     private Socket socket = null;
     Context mContext;
+    Handler handler;
+    Message message;
 
-    public SocketClient(Context context,String serverIP,int port){
+    public SocketClient(Context context, String serverIP, int port, Handler uiHandler){
         mContext = context;
+        this.handler = uiHandler;
+
         try {
             this.socket = new Socket(serverIP,port);
         } catch (IOException e) {
@@ -75,15 +84,17 @@ public class SocketClient {
         }
 
 
-//        Toast.makeText(mContext, "接收进度", Toast.LENGTH_SHORT).show();
         for (int i=0;i<fileNum;i++){
             long length = fileinfos[i].mFileSize;
+
+
             try {
                 DataOutputStream dos = new DataOutputStream(new FileOutputStream(mFilePath
                         + fileinfos[i].mFileName));
                 int bufferSize = 8192;//使用8192，是因为socket自带的缓冲区大小是这个，似乎大小匹配了，传输效率更高
                 byte[] buf = new byte[bufferSize];
                 while (true) {
+
                     if (length >= bufferSize) {
                         din.readFully(buf);
                         dos.write(buf, 0, bufferSize);
@@ -97,15 +108,19 @@ public class SocketClient {
                         dos.write(smallBuf);
                         break;
                     }
+                    Message message = new Message();
+                    message.arg1 = i+1; //第几个文件
+                    message.obj =100-(int)(length*100/fileinfos[i].mFileSize);
+                    handler.sendMessage(message);
                 }
 //                dos.flush();
                 dos.close();
+
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
 
         }
 //        send_file_step1.showClient.setText(mList.size());
@@ -115,48 +130,6 @@ public class SocketClient {
         public String mFileName;
         public long mFileSize ;
 
-    }
-
-    private void ReceiveFile(Socket socket){
-        try{
-
-            InputStream nameStream = socket.getInputStream();
-            InputStreamReader streamReader = new InputStreamReader(nameStream);
-            BufferedReader br = new BufferedReader(streamReader);
-
-            String length = br.readLine();
-            int len = Integer.parseInt(length);
-
-            Log.i("RECEV File:", "文件数量:" + len);
-
-            InputStream dataStream = null;
-            FileOutputStream file = null;
-            for (int i=0;i<len;i++){
-            String fileName = br.readLine();
-                Log.i("RECEV File:", "正在接收:" + fileName);
-
-                dataStream = socket.getInputStream();
-                String savePath = "/storage/emulated/0/123456" + "/" + fileName;
-                file = new FileOutputStream(savePath, false);
-                byte[] buffer = new byte[1024];
-                int size = -1;
-                while ((size = dataStream.read(buffer)) != -1){
-                    file.write(buffer, 0 ,size);
-                }
-                Log.i("RECEV File:", fileName + "接收完成");
-
-                file.flush();
-            }
-            br.close();
-            streamReader.close();
-            nameStream.close();
-            file.close();
-            dataStream.close();
-            socket.close();
-
-        }catch(Exception e){
-            Log.i("RECEV File:", "接收错误:\n" + e.getMessage());
-        }
     }
 
 }

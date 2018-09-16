@@ -1,12 +1,14 @@
 package com.example.yangquan.myapplication;
 
 import android.content.Context;
-import android.support.v4.view.PagerAdapter;
+//import android.support.v4.view.PagerAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Vector;
+
+import androidx.viewpager.widget.PagerAdapter;
 
 public class CustomPagerAdapter extends PagerAdapter {
 

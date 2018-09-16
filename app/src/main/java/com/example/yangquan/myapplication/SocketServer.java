@@ -3,7 +3,9 @@ package com.example.yangquan.myapplication;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
@@ -38,20 +40,17 @@ public class SocketServer {
     private ExecutorService mExecutorService = null; //thread pool
     private Context context;
 
-    public SocketServer(Context context,ArrayList<File> files){
+    public SocketServer(Context context, ArrayList<File> files){
         this.files = files;
         this.context = context;
 
-        try
-        {
+        try {
             server = new ServerSocket(PORT);
             //创建线程池
             mExecutorService = Executors.newCachedThreadPool();
             InetAddress address = InetAddress.getLocalHost();
 
-
             Log.i("服务端：.","开始服务");
-
             Socket client = null;
             while(true)
             {
@@ -65,16 +64,21 @@ public class SocketServer {
 
     class Service implements Runnable {
         private Socket socket;
+//        Handler uiHandler;
+//        Message message;
         public Service(Socket socket) {
             this.socket = socket;
+//            this.uiHandler = uiHandler;
+//            this.message = new Message();
         }
         @Override
         public void run() {
             try{
                 //发文件
                 sendFile(files);
-
-            }catch(Exception e){e.printStackTrace();}
+            }catch(Exception e){
+                e.printStackTrace();
+            }
         }
 
         //发送文件
@@ -92,7 +96,6 @@ public class SocketServer {
 
                 for (int i = 0; i < files.size(); i++) {
                     dout.writeUTF(files.get(i).getName());
-
                     Log.d("新的 SendFile",files.get(i).getName());
                     dout.flush();
                     dout.writeLong(files.get(i).length());
@@ -107,9 +110,11 @@ public class SocketServer {
                     BufferedInputStream din = new BufferedInputStream(
                             new FileInputStream(files.get(i)));
                     while ((len = din.read(buf)) != -1) {
+
                         dout.write(buf, 0, len);
                     }
                 }
+
                 Log.d("新的 SendFile","文件传输完成");
 
             } catch (Exception e) {

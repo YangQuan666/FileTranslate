@@ -4,7 +4,9 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.app.AppCompatActivity;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -14,6 +16,8 @@ import android.widget.Toast;
 import java.io.File;
 import java.util.ArrayList;
 
+import androidx.appcompat.app.AppCompatActivity;
+
 public class send_file_step1 extends AppCompatActivity {
 
     Button button;
@@ -21,6 +25,7 @@ public class send_file_step1 extends AppCompatActivity {
     SocketServer s;
     Context context;
     public static ArrayList<File> files = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -2,8 +2,8 @@ package com.example.yangquan.myapplication;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v4.view.ViewPager;
+//import android.support.v7.app.AppCompatActivity;
+//import android.support.v4.view.ViewPager;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -15,6 +15,9 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.io.File;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
 
 public class send_file_step2 extends AppCompatActivity implements View.OnClickListener{
 
@@ -29,6 +32,7 @@ public class send_file_step2 extends AppCompatActivity implements View.OnClickLi
     private Button checkOK;
 
 //    private ListView musicListV;
+
 
 
     @Override
